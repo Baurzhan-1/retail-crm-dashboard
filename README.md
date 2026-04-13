@@ -82,6 +82,71 @@ npm run bot
 
 ---
 
+## Ошибки и решения
+
+В процессе создания проекта возникли следующие проблемы:
+
+### 1. RetailCRM API — формат данных
+
+| Ошибка | Решение |
+|--------|---------|
+| `Parameter 'order' is missing` | RetailCRM ожидает form-data (URLSearchParams), а не JSON body |
+| `"OrderType" with "code"="eshop-individual" does not exist` | Убрать orderType — CRM создаст заказ с типом по умолчанию |
+| `limit should be equal to 20, 50 or 100` | Использовать только 50 для пагинации |
+
+**Код:**
+```javascript
+const formData = new URLSearchParams();
+formData.append('order', JSON.stringify(crmOrder));
+// НЕ body: JSON.stringify({ order: crmOrder })
+```
+
+### 2. Supabase — Row Level Security (RLS)
+
+| Ошибка | Решение |
+|--------|---------|
+| `404 NOT_FOUND` от Supabase | Анонимный доступ заблокирован RLS политиками |
+| `Could not find the function public.exec` | Supabase не поддерживает RPC exec для SQL |
+
+**Решение:** В Supabase Dashboard → SQL Editor выполнить:
+```sql
+CREATE POLICY "Allow anon reads" ON orders FOR SELECT TO anon USING (true);
+CREATE POLICY "Allow anon reads" ON order_items FOR SELECT TO anon USING (true);
+CREATE POLICY "Allow anon reads" ON processed_orders FOR SELECT TO anon USING (true);
+```
+
+### 3. Vercel — деплой
+
+| Ошибка | Решение |
+|--------|---------|
+| `token is not valid` | Перелогиниться: `vercel login` |
+| Старая ссылка не обновляется | Перепривязать проект: `vercel link --project retail-crm-dashboard` |
+
+**Команды:**
+```bash
+cd dashboard
+vercel login
+vercel link --project retail-crm-dashboard
+vercel --prod
+```
+
+### 4. Git — пуш на GitHub
+
+| Ошибка | Решение |
+|--------|---------|
+| `Author identity unknown` | Настроить: `git config user.email "..." && git config user.name "..."` |
+| `fetch first` (rejected) | Принудительный пуш: `git push --force` |
+| `not a git repository` | Инициализировать: `git init` |
+
+### 5. Node.js — модули
+
+| Ошибка | Решение |
+|--------|---------|
+| `fetch is not a function` | Использовать ESM: `import fetch from 'node-fetch'` |
+| `Cannot find module` | Установить зависимости: `npm install` |
+
+---
+
 ## Промты для создания проекта
 
 Если бы я создавал этот проект с нуля, я бы использовал следующие промты:
@@ -158,3 +223,5 @@ npm run bot
 ---
 
 **Главное правило:** описывай конкретную ошибку и проси исправить. AI хорошо понимает "выдает ошибку 404 при запросе к Supabase" лучше чем "не работает".
+
+**Главный вывод:** RetailCRM API неожиданно потребовал form-data вместо JSON, а Supabase — настройку RLS политик вручную. Без отладки эти проблемы было бы сложно найти.
