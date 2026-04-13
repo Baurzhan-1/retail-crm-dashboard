@@ -52,13 +52,13 @@ cp .env.example .env
 ## Шаг 3: Загрузка заказов в RetailCRM
 
 ```bash
-npm run upload-to-retailcrm
+npm run upload
 ```
 
 ## Шаг 4: Синхронизация с Supabase
 
 ```bash
-npm run sync-to-supabase
+npm run sync
 ```
 
 ## Шаг 5: Деплой дашборда на Vercel
@@ -68,12 +68,10 @@ cd dashboard
 npx vercel
 ```
 
-Обновите `SUPABASE_URL` и `SUPABASE_ANON_KEY` в `dashboard/index.html`.
-
 ## Шаг 6: Запуск Telegram-бота
 
 ```bash
-npm run telegram-bot
+npm run bot
 ```
 
 Бот будет проверять новые заказы каждую минуту и отправлять уведомления при сумме > 50,000 ₸.
@@ -81,3 +79,82 @@ npm run telegram-bot
 ## Команды бота
 - `/start` - Запуск бота
 - `/status` - Статистика заказов
+
+---
+
+## Промты для создания проекта
+
+Если бы я создавал этот проект с нуля, я бы использовал следующие промты:
+
+### Этап 1: Настройка проекта
+
+```
+Создай Node.js проект с ES modules для интеграции RetailCRM с Supabase.
+Зависимости: dotenv, node-fetch, @supabase/supabase-js, node-telegram-bot-api
+```
+
+### Этап 2: Структура и переменные
+
+```
+Создай файл .env.example с переменными:
+- RETAILCRM_URL, RETAILCRM_API_KEY
+- SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY
+- TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+
+Создай README.md с инструкцией по настройке каждого сервиса
+```
+
+### Этап 3: Скрипт загрузки в RetailCRM
+
+```
+Напиши скрипт upload-to-retailcrm.js который:
+- Читает mock_orders.json
+- Для каждого заказа создаёт заказ в RetailCRM через POST /api/v5/orders/create
+- Использует form-data для отправки (URLSearchParams)
+- Формат: { externalId, firstName, lastName, phone, status, items: [{offerName, quantity, initialPrice}], delivery: {address: {city, text}} }
+```
+
+### Этап 4: Скрипт синхронизации в Supabase
+
+```
+Напиши скрипт sync-to-supabase.js который:
+- Получает все заказы из RetailCRM (GET /api/v5/orders?limit=50)
+- Создаёт таблицы: orders, order_items, processed_orders
+- Синхронизирует новые заказы в Supabase
+- Пропускает уже обработанные (processed_orders)
+```
+
+### Этап 5: Дашборд
+
+```
+Создай dashboard/index.html с:
+- Подключением Supabase (@supabase/supabase-js)
+- Chart.js для графиков
+- 4 карточки статистики (всего заказов, сумма, средний чек, города)
+- График продаж по городам (bar chart)
+- График UTM источников (doughnut chart)
+- Таблица последних заказов
+```
+
+### Этап 6: Telegram бот
+
+```
+Напиши telegram-bot.js который:
+- Проверяет новые заказы каждую минуту
+- Отправляет уведомление если сумма > 50000₸
+- Формат сообщения: номер заказа, имя клиента, сумма, город, телефон
+- Команды /start и /status
+```
+
+### Этап 7: Деплой
+
+```
+Как задеплоить dashboard на Vercel:
+1. cd dashboard
+2. npx vercel --prod
+3. Настроить environment variables в Vercel Dashboard
+```
+
+---
+
+**Главное правило:** описывай конкретную ошибку и проси исправить. AI хорошо понимает "выдает ошибку 404 при запросе к Supabase" лучше чем "не работает".
