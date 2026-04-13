@@ -1,0 +1,17 @@
+{
+  "name": "retail-crm-sync",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "upload": "node scripts/upload-to-retailcrm.js",
+    "sync": "node scripts/sync-to-supabase.js",
+    "load": "node scripts/load-to-supabase.js",
+    "bot": "node scripts/telegram-bot.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2",
+    "@supabase/supabase-js": "^2.39.0",
+    "node-telegram-bot-api": "^0.64.0"
+  }
+}
